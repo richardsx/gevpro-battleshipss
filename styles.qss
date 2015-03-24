@@ -1,0 +1,30 @@
+#normaalbord {
+    background-color: white;
+    color: black;
+    width: 30px;
+    margin: 0;
+    height: 20px;	
+}
+
+#Ship {
+    background-color: red;
+    color: black;
+    width: 30px;
+    height: 20px;
+    margin: 0;
+}
+
+#raak {
+    background-color: red;
+    color: black;
+    width: 30px;
+    height: 20px;
+    margin: 0;
+}
+
+#mis{
+   background-color: grey;
+   color: black;
+   width: 30px;
+   height: 20px;
+   margin: 0; }
