@@ -23,6 +23,7 @@ class Zeeslag(QtGui.QWidget):
 		self.userLabel = QtGui.QLabel('Jouw veld')
 		self.botLabel = QtGui.QLabel('Computers veld')
 		self.feedback = QtGui.QLabel(' ')
+		self.feedback2=QtGui.QLabel(' hoi')
 		
 		"""maakt 100 vakjes voor jou en 100 voor computer"""
 		self.jouwveld = {}
@@ -50,54 +51,110 @@ class Zeeslag(QtGui.QWidget):
 		self.grid.addWidget(self.userLabel, 0, 0)
 		self.grid.addWidget(self.botLabel, 0, 11)
 		self.grid.addWidget(self.feedback,1,11)
+		self.grid.addWidget(self.feedback2,1,0)
 		self.gekleurdeboot()
 		self.show()
 
 		
 	def schiet(self, x, y):
 		"""computer schiet op een random vakje"""
-		self.checkShips(x, y, self.computerboot, self.computersveld)
+		if (self.controleer(x, y, self.computerboot, self.computersveld)) == True:
+			self.computersveld[x,y].setObjectName('raak')
+			self.computersveld[x,y].setStyleSheet(self.stylesheet)
+			self.feedback.setText("raak")
+			self.checkDestroyed(self.computerboot)
+		else:
+			self.computersveld[x,y].setObjectName('mis')
+			self.computersveld[x,y].setStyleSheet(self.stylesheet)
+			self.feedback.setText("mis")
 		autox, autoy = self.random()
-		time.sleep(1)
-		self.checkShips(autox, autoy, self.jouwboot, self.jouwveld)
+		if (self.controleer(autox, autoy, self.jouwboot, self.jouwveld)) == True:
+			self.feedback2.setText("raak")
+			self.jouwveld[autox, autoy].setObjectName('raak')
+			self.jouwveld[autox, autoy].setStyleSheet(self.stylesheet)
+			self.checkDestroyed2(self.jouwboot)
+		else:
+			self.jouwveld[autox, autoy].setObjectName('mis')
+			self.jouwveld[autox, autoy].setStyleSheet(self.stylesheet)
+			self.feedback2.setText("mis")
 
 	def random(self):
-		return randrange(10), randrange(10)
+		return randrange(10), randrange(1,10)
 
 	def gekleurdeboot(self):
 		"""zorgt ervoor dat jouw geplaatse boten rood zijn"""
-		for l in self.jouwboot.values():
-			for c in l:
-				self.kleurboot(c)
+		for a in self.jouwboot.values():
+			for b in a:
+				self.kleurboot(b)
 	def kleurboot(self, coordinaten):
 		self.jouwveld[coordinaten].setObjectName('Ship')
 		self.jouwveld[coordinaten].setStyleSheet(self.stylesheet)
 
-	def checkShips(self, x, y, coords, field):
+	def controleer(self, x, y, coords, field):
 		"""checkt of je raak hebt geschoten"""
-		click = (x, y)
+			
 		print(coords)
+		click = (x, y)
+		coordsList = []
+		for i in coords.values():
+			for j in i:
+				coordsList.append(j)
+			
 		for ship, coordinaten in coords.items():
-			for el in coordinaten:
-				if click == el:
-					field[el].setObjectName('raak')
-					field[el].setStyleSheet(self.stylesheet)
-					coordinaten.remove(el)
-					self.checkDestroyed(coords)
-					return True
-				else: 
-					"""als je mis schiet wordt het beschoten vakje grijs"""
-					field[click].setObjectName('mis')
-					field[click].setStyleSheet(self.stylesheet)
-					return False
+			for element in coordinaten:
+				if element == (click):
+					coordinaten.remove(element)
+					print(coordinaten)
+					
+		for a in coordsList:
+			if a == click:
+				return True
+		
 
 	def checkDestroyed(self, coords):
 		"""kijkt of je het hele schip kapot hebt gemaakt """
-		#dit werkt maar 1x?
-		self.feedback.setText("deze boot is nog niet gezonken")
-		for ship, coordinaten in coords.items():
-			if coords.get(ship) == []:
+		if 2 in coords:
+			if coords[2]== []:
 				self.feedback.setText("deze boot is gezonken")
+				del self.computerboot[2]
+		if 3 in coords:
+			if coords[3] == []:
+				self.feedback.setText("deze boot is gezonken")
+				del self.computerboot[3]
+		if 4 in coords:
+			if coords[4]==[]:
+				self.feedback.setText("deze boot is gezonken")
+				del self.computerboot[4]
+		if 5 in coords:
+			if coords[5]==[]:
+				self.feedback.setText("deze boot is gezonken")
+				del self.computerboot[5]
+		if self.computerboot=={}:
+			self.feedback.setText("Je hebt gewonnen")
+			
+			
+	def checkDestroyed2(self, coords):
+		"""kijkt of je het hele schip kapot hebt gemaakt """
+		print("hallo")
+		if 2 in coords:
+			if coords[2]== []:
+				self.feedback2.setText("deze boot is gezonken")
+				del self.jouwboot[2]
+		if 3 in coords:
+			if coords[3] == []:
+				self.feedback2.setText("deze boot is gezonken")
+				del self.jouwboot[3]
+		if 4 in coords:
+			if coords[4]==[]:
+				self.feedback2.setText("deze boot is gezonken")
+				del self.jouwboot[4]
+		if 5 in coords:
+			if coords[5]==[]:
+				self.feedback2.setText("deze boot is gezonken")
+				del self.jouwboot[5]
+		if self.jouwboot=={}:
+			self.feedback.setText("Je hebt verloren")
+			
 
 if __name__ == '__main__':
 	app = QtGui.QApplication(sys.argv)

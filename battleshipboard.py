@@ -33,16 +33,17 @@ class Boten(QtGui.QWidget):
 		self.plaats = QtGui.QPushButton('Plaats boot!', self)
 		self.plaats.setObjectName('MenuButton')
 		self.plaats.clicked.connect(self.maakbootdict)
+		self.plaats.clicked.connect(self.feedback)
 		self.plaats.setEnabled(False)
 		
 		"""maakt een dictionary voor de boten"""
-		self.botendict = {5: "vijf", 4: "vier", 3: "drie", 2: "twee"}
+		self.botendict = {5: 'vijf', 4: 'vier', 3: 'drie', 2: 'twee'}
 		self.coordboten = {}
 		self.lengteboot = list(self.botendict.keys())
 		
 		"""maakt feedback labels"""
 		self.feedback = QtGui.QLabel('klik waar je wilt dat de boot begint', self)
-		self.feedback2=QtGui.QLabel('De boten worden automatisch horizontaal geplaatst',self)
+		self.feedback2=QtGui.QLabel('De boten worden automatisch horizontaal geplaatst,\n let op dat je genoeg ruimte hebt rechts van het geklikte hokje, zodat de boot niet van het bord af valt',self)
 		
 		"""maakt een knop om het spel te starten"""
 		self.startGame = QtGui.QPushButton('Spelen', self)
@@ -66,9 +67,9 @@ class Boten(QtGui.QWidget):
 		for i in range(self.lengteboot[0]):
 			self.schipcoordinaten.append((int(self.kolom), int(self.rij) + int(i)))
 		self.plaats.setEnabled(True)
-		for l in self.coordboten.values():
-			for c in l:
-				self.kleur(c)
+		for a in self.coordboten.values():
+			for b in a:
+				self.kleur(b)
 		
 	def maakbootdict(self):
 		"""Zet de coordinaten van neergezette boot in een dictionairy"""
@@ -82,7 +83,7 @@ class Boten(QtGui.QWidget):
 				self.plaats.setEnabled(False)
 				self.startGame.setEnabled(True)
 				self.feedback.setText('Je kan beginnen!')
-		
+
 	def feedback(self):
 		"""vertelt de gebruiker wat hij moet doen"""
 		if len(self.coordboten)==1:
@@ -103,21 +104,27 @@ class Boten(QtGui.QWidget):
 		"""zet random boten neer voor de computer """
 		self.AIbootCoords={}
 		lengte = [5,4,3,3,2]
-
-		while lengte != []:
-			coordsList = []
-			direction = randrange(2)
-			
-			startX = randrange(10)
-			startY = randrange(12,21)
-			
-			for i in range(lengte[0]):
-				coordsList.append((int(startX), int(startY) + int(i)))
-			
-			self.AIbootCoords[lengte[0]] = coordsList
-			lengte.pop(0)
+		for i in lengte: # per boot
+			self.checkAIoverlap(i)
 		return self.AIbootCoords
-
+		
+	def checkAIoverlap(self,aantalboten):
+		while(True):
+				startX = randrange(10)
+				startY = randrange(12,18)
+				length=0
+				templist=[]
+				coordsList = [] # maak een lege coordinatenlijst
+				for j in range(aantalboten): # per coordinaat vd boot
+					if not ((int(startX),int(startY)+int(j)) in coordsList): # als de huidige coordinaat nog beschikbaar is
+						length+=1
+						templist.append((int(startX),int(startY)+int(j)))  
+						if length==aantalboten: # in het geval dat alle coordinaten van boot i goed zijn
+							coordsList.extend(templist)
+							self.AIbootCoords[aantalboten]=coordsList
+							return self.AIbootCoords
+							
+							
 	def start(self):
 		"""verlaat het scherm van boten neerzetten en opent het speelscherm"""
 		self.close()
