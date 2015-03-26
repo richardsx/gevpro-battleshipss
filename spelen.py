@@ -1,4 +1,5 @@
 #!/opt/local/bin/python3.4
+# Josine Rawee en Richards Zheng
 
 from PyQt4 import QtGui, QtCore
 import os, sys
@@ -7,6 +8,7 @@ from random import randrange
 
 
 class Zeeslag(QtGui.QWidget):
+	
 	def __init__(self, jouwboot, computerboot):
 		super(Zeeslag, self).__init__()
 		self.jouwboot = jouwboot
@@ -14,7 +16,8 @@ class Zeeslag(QtGui.QWidget):
 		self.initUI()
 
 	def initUI(self):
-		"""maakt het de layout van het speelveld"""
+		
+		# maak het speelveld en voeg labels toe
 		self.setWindowTitle("Zeeslag")
 		self.setGeometry(1000, 1000, 1000, 1000)
 		self.grid = QtGui.QGridLayout()
@@ -23,31 +26,33 @@ class Zeeslag(QtGui.QWidget):
 		self.userLabel = QtGui.QLabel('Jouw veld')
 		self.botLabel = QtGui.QLabel('Computers veld')
 		self.feedback = QtGui.QLabel(' ')
-		self.feedback2=QtGui.QLabel(' hoi')
+		self.feedback2 = QtGui.QLabel(' hoi')
 		
-		"""maakt 100 vakjes voor jou en 100 voor computer"""
-		self.jouwveld = {}
-		for row in range(10):
-			for column in range(1, 11):
-				coordinaten = (row, column)
-				self.jouwveld[coordinaten] = QtGui.QPushButton(str(row) + ":" + str(column))
-				self.jouwveld[coordinaten].setStyleSheet(self.stylesheet)
-				self.jouwveld[coordinaten].setObjectName('normaalbord')
-				self.grid.addWidget(self.jouwveld[coordinaten], row, column)
+		# maakt 100 hokjes om het spel te spelen
+		# 100 voor de user en 100 voor de computer
+		self.spelersveld = {}
+		for rij in range(10):
+			for kolom in range(1, 11):
+				coordinaten = (rij, kolom)
+				self.spelersveld[coordinaten] = QtGui.QPushButton(str(rij) + ":" + str(kolom))
+				self.spelersveld[coordinaten].setStyleSheet(self.stylesheet)
+				self.spelersveld[coordinaten].setObjectName('normaalbord')
+				self.grid.addWidget(self.spelersveld[coordinaten], rij, kolom)
 
 		self.computersveld = {}
-		for row in range(10):
-			for column in range(12, 22):
-				coordinaten = (row, column)
-				self.computersveld[coordinaten] = QtGui.QPushButton(str(row) + ":" + str(column))
+		for rij in range(10):
+			for kolom in range(12, 22):
+				coordinaten = (rij, kolom)
+				self.computersveld[coordinaten] = QtGui.QPushButton(str(rij) + ":" + str(kolom))
 				self.computersveld[coordinaten].setStyleSheet(self.stylesheet)
 				self.computersveld[coordinaten].setObjectName('normaalbord')
-				self.grid.addWidget(self.computersveld[coordinaten], row, column)
-				"""geeft coordinaten van waar jij hebt geschoten, en schiet vervoglens op jouw veld"""
-				self.computersveld[coordinaten].clicked.connect(lambda c, x=row, y=column: self.schiet(x, y))
+				self.grid.addWidget(self.computersveld[coordinaten], rij, kolom)
 				
-				
-		"""voegt alles toe aan de widget"""
+				# geeft de coordinaten door en schiet vervolgens op het hokje waar je op hebt geklikt
+				# schiet ook terug op jouw veld
+				self.computersveld[coordinaten].clicked.connect(lambda c, x = rij, y = kolom: self.schiet(x, y))
+					
+		# voegt onderdelen toe aan widget
 		self.grid.addWidget(self.userLabel, 0, 0)
 		self.grid.addWidget(self.botLabel, 0, 11)
 		self.grid.addWidget(self.feedback,1,11)
@@ -55,9 +60,12 @@ class Zeeslag(QtGui.QWidget):
 		self.gekleurdeboot()
 		self.show()
 
-		
+		# schiet op het hokje waar op gedrukt wordt
+		# set de feedbacklabel naar 'raak' wanneer deze raak is en kleurt het hokje groen
+		# set de feedbacklabel naar 'mis' wanneer deze mis is en kleurt het hokje grijs
+		# schiet willeukeurig voor de computer
+		# idem dito voor hokje en feedbacklabel als voor de gebruiker
 	def schiet(self, x, y):
-		"""computer schiet op een random vakje"""
 		if (self.controleer(x, y, self.computerboot, self.computersveld)) == True:
 			self.computersveld[x,y].setObjectName('raak')
 			self.computersveld[x,y].setStyleSheet(self.stylesheet)
@@ -67,31 +75,35 @@ class Zeeslag(QtGui.QWidget):
 			self.computersveld[x,y].setObjectName('mis')
 			self.computersveld[x,y].setStyleSheet(self.stylesheet)
 			self.feedback.setText("mis")
+			
+		# random gegeneerde x,y	
 		autox, autoy = self.random()
-		if (self.controleer(autox, autoy, self.jouwboot, self.jouwveld)) == True:
+		if (self.controleer(autox, autoy, self.jouwboot, self.spelersveld)) == True:
 			self.feedback2.setText("raak")
-			self.jouwveld[autox, autoy].setObjectName('raak')
-			self.jouwveld[autox, autoy].setStyleSheet(self.stylesheet)
+			self.spelersveld[autox, autoy].setObjectName('raak')
+			self.spelersveld[autox, autoy].setStyleSheet(self.stylesheet)
 			self.checkDestroyed2(self.jouwboot)
 		else:
-			self.jouwveld[autox, autoy].setObjectName('mis')
-			self.jouwveld[autox, autoy].setStyleSheet(self.stylesheet)
+			self.spelersveld[autox, autoy].setObjectName('mis')
+			self.spelersveld[autox, autoy].setStyleSheet(self.stylesheet)
 			self.feedback2.setText("mis")
 
+		# returnt willekeurige coordinaten voor de computer
 	def random(self):
 		return randrange(10), randrange(1,10)
 
+		# kleurt geplaatste boten rood
 	def gekleurdeboot(self):
-		"""zorgt ervoor dat jouw geplaatse boten rood zijn"""
 		for a in self.jouwboot.values():
 			for b in a:
 				self.kleurboot(b)
 	def kleurboot(self, coordinaten):
-		self.jouwveld[coordinaten].setObjectName('Ship')
-		self.jouwveld[coordinaten].setStyleSheet(self.stylesheet)
+		self.spelersveld[coordinaten].setObjectName('Ship')
+		self.spelersveld[coordinaten].setStyleSheet(self.stylesheet)
 
+		# controleert of een gedeelte van het schip geraakt is
+		# return true als het zo is
 	def controleer(self, x, y, coords, field):
-		"""checkt of je raak hebt geschoten"""
 			
 		print(coords)
 		click = (x, y)
@@ -110,11 +122,11 @@ class Zeeslag(QtGui.QWidget):
 			if a == click:
 				return True
 		
-
+		# controleert per schip of het hele schip van de computer geraakt is
+		# wanneer alle schepen zijn geraakt, wordt het label gezet naar "Je hebt gewonnen"
 	def checkDestroyed(self, coords):
-		"""kijkt of je het hele schip kapot hebt gemaakt """
 		if 2 in coords:
-			if coords[2]== []:
+			if coords[2] == []:
 				self.feedback.setText("deze boot is gezonken")
 				del self.computerboot[2]
 		if 3 in coords:
@@ -122,22 +134,21 @@ class Zeeslag(QtGui.QWidget):
 				self.feedback.setText("deze boot is gezonken")
 				del self.computerboot[3]
 		if 4 in coords:
-			if coords[4]==[]:
+			if coords[4] == []:
 				self.feedback.setText("deze boot is gezonken")
 				del self.computerboot[4]
 		if 5 in coords:
-			if coords[5]==[]:
+			if coords[5] == []:
 				self.feedback.setText("deze boot is gezonken")
 				del self.computerboot[5]
-		if self.computerboot=={}:
+		if self.computerboot == {}:
 			self.feedback.setText("Je hebt gewonnen")
 			
-			
+		# controleert per schip of het hele schip van de gebruiker geraakt is
+		# wanneer alle schepen zijn geraakt, wordt het label gezet naar "Je hebt verloren"
 	def checkDestroyed2(self, coords):
-		"""kijkt of je het hele schip kapot hebt gemaakt """
-		print("hallo")
 		if 2 in coords:
-			if coords[2]== []:
+			if coords[2] == []:
 				self.feedback2.setText("deze boot is gezonken")
 				del self.jouwboot[2]
 		if 3 in coords:
@@ -145,14 +156,14 @@ class Zeeslag(QtGui.QWidget):
 				self.feedback2.setText("deze boot is gezonken")
 				del self.jouwboot[3]
 		if 4 in coords:
-			if coords[4]==[]:
+			if coords[4] == []:
 				self.feedback2.setText("deze boot is gezonken")
 				del self.jouwboot[4]
 		if 5 in coords:
-			if coords[5]==[]:
+			if coords[5] == []:
 				self.feedback2.setText("deze boot is gezonken")
 				del self.jouwboot[5]
-		if self.jouwboot=={}:
+		if self.jouwboot == {}:
 			self.feedback.setText("Je hebt verloren")
 			
 
