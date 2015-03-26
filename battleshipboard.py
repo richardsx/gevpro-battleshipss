@@ -25,8 +25,8 @@ class Boten(QtGui.QWidget):
 		self.setStyleSheet(self.stylesheet)
 		
 		# maakt 100 hokjes om de boten te plaatsen
-		for rij in range(10):
-			for kolom in range(0, 10):
+		for rij in range(1, 11):
+			for kolom in range(1, 11):
 				coordinaten = (rij, kolom)
 				self.bord[coordinaten] = QtGui.QPushButton(str(rij) + ":" + str(kolom))
 				self.bord[coordinaten].clicked.connect(lambda c, x = rij, y = kolom: self.plaatsboot(x, y))
@@ -57,8 +57,8 @@ class Boten(QtGui.QWidget):
 		self.startGame.clicked.connect(self.start)
 		
 		# voegt onderdelen toe aan widget
-		self.grid.addWidget(self.plaats, 0, 11)
-		self.grid.addWidget(self.startGame, 1, 11)
+		self.grid.addWidget(self.plaats, 1, 11)
+		self.grid.addWidget(self.startGame, 2, 11)
 		self.grid.addWidget(self.feedback, 2, 11)
 		self.grid.addWidget(self.feedback2, 3, 11)
 		self.setWindowTitle("Zeeslag")

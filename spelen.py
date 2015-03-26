@@ -21,7 +21,7 @@ class Zeeslag(QtGui.QWidget):
 		self.grid = QtGui.QGridLayout()
 		self.setLayout(self.grid)
 		self.stylesheet = open(os.getcwd() + '/styles.qss').read()
-		self.userLabel = QtGui.QLabel('Jouw veld')
+		self.userLabel = QtGui.QLabel('Gebruikers veld')
 		self.botLabel = QtGui.QLabel('Computers veld')
 		self.feedback = QtGui.QLabel(' ')
 		self.feedback2 = QtGui.QLabel(' ')
@@ -31,7 +31,7 @@ class Zeeslag(QtGui.QWidget):
 		# maakt hokjes om het spel te spelen
 		# 100 voor de user en 100 voor de computer
 		self.spelersveld = {}
-		for rij in range(10):
+		for rij in range(1, 11):
 			for kolom in range(1, 11):
 				coordinaten = (rij, kolom)
 				self.spelersveld[coordinaten] = QtGui.QPushButton(str(rij) + ":" + str(kolom))
@@ -40,7 +40,7 @@ class Zeeslag(QtGui.QWidget):
 				self.grid.addWidget(self.spelersveld[coordinaten], rij, kolom)
 
 		self.computersveld = {}
-		for rij in range(10):
+		for rij in range(1, 11):
 			for kolom in range(12, 22):
 				coordinaten = (rij, kolom)
 				self.computersveld[coordinaten] = QtGui.QPushButton(str(rij) + ":" + str(kolom))
@@ -53,10 +53,10 @@ class Zeeslag(QtGui.QWidget):
 				self.computersveld[coordinaten].clicked.connect(lambda c, x = rij, y = kolom: self.schiet(x, y))
 					
 		# voegt onderdelen toe aan widget
-		self.grid.addWidget(self.userLabel, 0, 0)
-		self.grid.addWidget(self.botLabel, 0, 11)
-		self.grid.addWidget(self.feedback,1,11)
-		self.grid.addWidget(self.feedback2,1,0)
+		self.grid.addWidget(self.userLabel, 1, 0)
+		self.grid.addWidget(self.botLabel, 1, 11)
+		self.grid.addWidget(self.feedback, 2, 11)
+		self.grid.addWidget(self.feedback2, 2, 0)
 		self.gekleurdeboot()
 		self.show()
 
@@ -98,7 +98,7 @@ class Zeeslag(QtGui.QWidget):
 
 	# returnt willekeurige coordinaten voor de computer
 	def random(self):
-		return randrange(10), randrange(1,10)
+		return randrange(1, 11), randrange(1, 11)
 
 	# controleert of een gedeelte van het schip geraakt is
 	# returnt true als dit zo is
