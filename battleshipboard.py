@@ -1,7 +1,6 @@
 #!/opt/local/bin/python3.4
 # Josine Rawee en Richards Zheng
 
-from collections import Counter
 import sys
 import os, sys
 from PyQt4 import QtCore, QtGui
@@ -15,14 +14,15 @@ class Boten(QtGui.QWidget):
 		super(Boten,self).__init__()
 		self.initUI()
 
+	# maakt een widget waarin de gebruiker zijn schepen kan neerzetten
 	def initUI(self):
-		
-		# maakt een widget waar de gebruiker zijn schepen kan neerzetten
 		self.setGeometry(150, 150, 600, 600)
 		self.grid = QtGui.QGridLayout()
 		self.setLayout(self.grid)
 		self.stylesheet = open(os.getcwd() + '/styles.qss').read()
 		self.bord = {}
+		self.setObjectName('achtergrond')
+		self.setStyleSheet(self.stylesheet)
 		
 		# maakt 100 hokjes om de boten te plaatsen
 		for rij in range(10):
@@ -47,10 +47,10 @@ class Boten(QtGui.QWidget):
 		self.lengteboot = list(self.botendict.keys())
 		
 		# maakt labels
-		self.feedback = QtGui.QLabel('klik waar je wilt dat de boot begint', self)
+		self.feedback = QtGui.QLabel('klik op de beginplek van de boot met lengte 2', self)
 		self.feedback2 = QtGui.QLabel('De boten worden automatisch horizontaal geplaatst,\n let op dat je genoeg ruimte hebt rechts van het geklikte hokje, zodat de boot niet van het bord af valt',self)
 		
-		# maakt startknop
+		# maakt startknop die alleen beschikbaar is als alle 3 de boten zijn geplaatst
 		self.startGame = QtGui.QPushButton('Spelen', self)
 		self.startGame.setObjectName('MenuButton')
 		self.startGame.setEnabled(False)
@@ -64,7 +64,7 @@ class Boten(QtGui.QWidget):
 		self.setWindowTitle("Zeeslag")
 		self.show()
 		
-		# plaats boot
+	# plaats boot
 	def plaatsboot(self, x, y):
 		self.rij = y
 		self.kolom = x
@@ -72,12 +72,10 @@ class Boten(QtGui.QWidget):
 		for i in range(self.lengteboot[0]):
 			self.schipcoordinaten.append((int(self.kolom), int(self.rij) + int(i)))
 		self.plaats.setEnabled(True)
-		for a in self.coordboten.values():
-			for b in a:
-				self.kleur(b)
 		
-		# zet de geplaatste boten in een dictionary
+	# zet de geplaatste boten in een dictionary
 	def maakbootdict(self):
+		
 		if self.schipcoordinaten != []:
 			self.coordboten[self.botendict[self.lengteboot[0]]] = self.schipcoordinaten
 		
@@ -89,8 +87,11 @@ class Boten(QtGui.QWidget):
 				self.startGame.setEnabled(True)
 				self.feedback.setText('Je kan beginnen!')
 				
-		# vertel de gebruiker wat hij/zij moet doen
+	# vertelt de gebruiker wat hij/zij moet doen
 	def feedback(self):
+		for a in self.coordboten.values():
+			for b in a:
+				self.kleur(b)
 		if len(self.coordboten) == 1:
 			self.feedback.setText('Klik op de beginplaats van de boot met een lengte van 3')
 		if len(self.coordboten) == 2:
@@ -100,19 +101,20 @@ class Boten(QtGui.QWidget):
 		if len(self.coordboten) == 4:
 			self.feedback.setText('Je kan beginnen!')
 		
-		# verandert kleur van de geselecteerde hokjes
+	# verandert kleur van de geselecteerde hokjes
 	def kleur(self, coordinaten):
 		self.bord[coordinaten].setObjectName('Ship')
 		self.bord[coordinaten].setStyleSheet(self.stylesheet)
 
-		# plaatst random boten op de computer zijn veld
+	# plaatst random boten op de computer zijn veld
 	def AIboten(self):
 		self.AIbootCoords = {}
 		lengte = [5,4,3,3,2]
-		for i in lengte: # per boot
+		for i in lengte: #voert de overlap check uit voor elke boot
 			self.checkAIoverlap(i)
 		return self.AIbootCoords
 		
+	#Checkt of de boten van de computer elkaar niet overlappen
 	def checkAIoverlap(self, aantalboten):
 		while(True):
 				startX = randrange(10)
@@ -120,16 +122,17 @@ class Boten(QtGui.QWidget):
 				length = 0
 				templist = []
 				coordsList = [] # maak een lege coordinatenlijst
-				for j in range(aantalboten): # per coordinaat vd boot
+				for j in range(aantalboten): # per coordinaat van de boot
 					if not ((int(startX),int(startY)+int(j)) in coordsList): # als de huidige coordinaat nog beschikbaar is
 						length += 1
 						templist.append((int(startX),int(startY)+int(j)))  
-						if length == aantalboten: # in het geval dat alle coordinaten van boot i goed zijn
+						# in het geval dat alle coordinaten van boot i nog beschikbaar zijn, worden deze coordinaten toegevoegd aan de coordinaten dictionairy.
+						if length == aantalboten: 
 							coordsList.extend(templist)
 							self.AIbootCoords[aantalboten] = coordsList
 							return self.AIbootCoords		
 							
-		# verlaat het scherm wanneer alle boten zijn geplaatst en opent het speelscherm					
+	# verlaat het scherm wanneer de gebruiker op start spel klikt en opent het speelscherm					
 	def start(self):
 		self.close()
 		spelen.Zeeslag(self.coordboten, self.AIboten())

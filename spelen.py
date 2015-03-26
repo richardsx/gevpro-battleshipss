@@ -3,7 +3,6 @@
 
 from PyQt4 import QtGui, QtCore
 import os, sys
-import time
 from random import randrange
 
 
@@ -15,9 +14,8 @@ class Zeeslag(QtGui.QWidget):
 		self.computerboot = computerboot
 		self.initUI()
 
+	# maakt het speelveld en voegt labels toe
 	def initUI(self):
-		
-		# maak het speelveld en voeg labels toe
 		self.setWindowTitle("Zeeslag")
 		self.setGeometry(1000, 1000, 1000, 1000)
 		self.grid = QtGui.QGridLayout()
@@ -26,9 +24,11 @@ class Zeeslag(QtGui.QWidget):
 		self.userLabel = QtGui.QLabel('Jouw veld')
 		self.botLabel = QtGui.QLabel('Computers veld')
 		self.feedback = QtGui.QLabel(' ')
-		self.feedback2 = QtGui.QLabel(' hoi')
+		self.feedback2 = QtGui.QLabel(' ')
+		self.setObjectName('achtergrond')
+		self.setStyleSheet(self.stylesheet)
 		
-		# maakt 100 hokjes om het spel te spelen
+		# maakt hokjes om het spel te spelen
 		# 100 voor de user en 100 voor de computer
 		self.spelersveld = {}
 		for rij in range(10):
@@ -49,7 +49,7 @@ class Zeeslag(QtGui.QWidget):
 				self.grid.addWidget(self.computersveld[coordinaten], rij, kolom)
 				
 				# geeft de coordinaten door en schiet vervolgens op het hokje waar je op hebt geklikt
-				# schiet ook terug op jouw veld
+				# computer schiet terug op jouw veld
 				self.computersveld[coordinaten].clicked.connect(lambda c, x = rij, y = kolom: self.schiet(x, y))
 					
 		# voegt onderdelen toe aan widget
@@ -60,11 +60,18 @@ class Zeeslag(QtGui.QWidget):
 		self.gekleurdeboot()
 		self.show()
 
-		# schiet op het hokje waar op gedrukt wordt
-		# set de feedbacklabel naar 'raak' wanneer deze raak is en kleurt het hokje groen
-		# set de feedbacklabel naar 'mis' wanneer deze mis is en kleurt het hokje grijs
-		# schiet willeukeurig voor de computer
-		# idem dito voor hokje en feedbacklabel als voor de gebruiker
+	#kleurt jouw eerder geplaatste boten rood
+	def gekleurdeboot(self):
+		for a in self.jouwboot.values():
+			for b in a:
+				self.kleurboot(b)
+	def kleurboot(self, coordinaten):
+		self.spelersveld[coordinaten].setObjectName('Ship')
+		self.spelersveld[coordinaten].setStyleSheet(self.stylesheet)
+		
+	# schiet op het hokje waar je op geklikt hebt
+	# zet de feedbacklabel naar 'raak' wanneer deze raak is en kleurt het hokje groen
+	# zet de feedbacklabel naar 'mis' wanneer deze mis is en kleurt het hokje grijs
 	def schiet(self, x, y):
 		if (self.controleer(x, y, self.computerboot, self.computersveld)) == True:
 			self.computersveld[x,y].setObjectName('raak')
@@ -76,42 +83,34 @@ class Zeeslag(QtGui.QWidget):
 			self.computersveld[x,y].setStyleSheet(self.stylesheet)
 			self.feedback.setText("mis")
 			
-		# random gegeneerde x,y	
+		# schiet willeukeurig voor de computer, random gegenereerde x en y
+		# doet het zelfde voor de kleur van het hokje en feedbacklabel als voor de gebruiker
 		autox, autoy = self.random()
 		if (self.controleer(autox, autoy, self.jouwboot, self.spelersveld)) == True:
 			self.feedback2.setText("raak")
 			self.spelersveld[autox, autoy].setObjectName('raak')
 			self.spelersveld[autox, autoy].setStyleSheet(self.stylesheet)
-			self.checkDestroyed2(self.jouwboot)
+			self.checkDestroyedAI(self.jouwboot)
 		else:
 			self.spelersveld[autox, autoy].setObjectName('mis')
 			self.spelersveld[autox, autoy].setStyleSheet(self.stylesheet)
 			self.feedback2.setText("mis")
 
-		# returnt willekeurige coordinaten voor de computer
+	# returnt willekeurige coordinaten voor de computer
 	def random(self):
 		return randrange(10), randrange(1,10)
 
-		# kleurt geplaatste boten rood
-	def gekleurdeboot(self):
-		for a in self.jouwboot.values():
-			for b in a:
-				self.kleurboot(b)
-	def kleurboot(self, coordinaten):
-		self.spelersveld[coordinaten].setObjectName('Ship')
-		self.spelersveld[coordinaten].setStyleSheet(self.stylesheet)
-
-		# controleert of een gedeelte van het schip geraakt is
-		# return true als het zo is
+	# controleert of een gedeelte van het schip geraakt is
+	# returnt true als dit zo is
 	def controleer(self, x, y, coords, field):
-			
 		print(coords)
 		click = (x, y)
 		coordsList = []
 		for i in coords.values():
 			for j in i:
 				coordsList.append(j)
-			
+				
+		#verwijdert de geraakte coordinaat uit de dictionairy.
 		for ship, coordinaten in coords.items():
 			for element in coordinaten:
 				if element == (click):
@@ -122,8 +121,9 @@ class Zeeslag(QtGui.QWidget):
 			if a == click:
 				return True
 		
-		# controleert per schip of het hele schip van de computer geraakt is
-		# wanneer alle schepen zijn geraakt, wordt het label gezet naar "Je hebt gewonnen"
+	# controleert per schip of het hele schip van de computer geraakt is
+	# als een heel schip geraakt is, wordt het label gezet naar "deze boot is gezonken"
+	# wanneer alle schepen in hun geheel zijn geraakt, wordt het label gezet naar "Je hebt gewonnen"
 	def checkDestroyed(self, coords):
 		if 2 in coords:
 			if coords[2] == []:
@@ -142,11 +142,12 @@ class Zeeslag(QtGui.QWidget):
 				self.feedback.setText("deze boot is gezonken")
 				del self.computerboot[5]
 		if self.computerboot == {}:
-			self.feedback.setText("Je hebt gewonnen")
+			self.feedback.setText("Je hebt gewonnen!! :)")
 			
-		# controleert per schip of het hele schip van de gebruiker geraakt is
-		# wanneer alle schepen zijn geraakt, wordt het label gezet naar "Je hebt verloren"
-	def checkDestroyed2(self, coords):
+	# controleert per schip of het hele schip van de gebruiker geraakt is
+	# als een heel schip geraakt is, wordt het label gezet naar "deze boot is gezonken"
+	# wanneer alle schepen in hun geheel zijn geraakt, wordt het label gezet naar "Je hebt verloren"
+	def checkDestroyedAI(self, coords):
 		if 2 in coords:
 			if coords[2] == []:
 				self.feedback2.setText("deze boot is gezonken")
@@ -164,8 +165,7 @@ class Zeeslag(QtGui.QWidget):
 				self.feedback2.setText("deze boot is gezonken")
 				del self.jouwboot[5]
 		if self.jouwboot == {}:
-			self.feedback.setText("Je hebt verloren")
-			
+			self.feedback.setText("Je hebt verloren :(")
 
 if __name__ == '__main__':
 	app = QtGui.QApplication(sys.argv)
